@@ -22,3 +22,6 @@ sessions/
 .idea/
 .DS_Store
 Thumbs.db
+
+# One-pager preview (rebuild with: python scripts/build_onepager.py --png)
+docs/*.png
