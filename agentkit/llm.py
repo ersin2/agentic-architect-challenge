@@ -540,16 +540,18 @@ class FaultyClient:
 
 
 class CountingClient:
-    """Count the model calls made through this wrapper (for example, per email)."""
+    """Count the model calls made through this wrapper (per email, per page). Thread-safe."""
 
     def __init__(self, inner: LLMClient) -> None:
         self.inner = inner
         self.provider = inner.provider
         self.model = inner.model
         self.calls = 0
+        self._lock = threading.Lock()
 
     def generate(self, messages: Sequence[Message], **kwargs: Any) -> LLMResponse:
-        self.calls += 1
+        with self._lock:
+            self.calls += 1
         return self.inner.generate(messages, **kwargs)
 
 

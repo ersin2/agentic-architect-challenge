@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rendered by JavaScript</title>
+</head>
+<body>
+  <noscript>Please enable JavaScript to view this page.</noscript>
+  <div id="app"></div>
+  <script>
+    // The real content only exists after this script runs, like a single-page app.
+    var paragraphs = [
+      "Lighthouses guided ships along dangerous coasts for more than two thousand years.",
+      "The first lighthouses were simple fires burning on hilltops near busy harbours.",
+      "Modern lighthouses use automatic electric lamps and rarely need a keeper on site.",
+      "Many old lighthouses are now museums that teach visitors about maritime history."
+    ];
+    var html = "<article><h1>A short history of lighthouses</h1>";
+    paragraphs.forEach(function (p) { html += "<p>" + p + "</p>"; });
+    document.getElementById("app").innerHTML = html + "</article>";
+  </script>
+</body>
+</html>
