@@ -157,12 +157,16 @@ What was actually run, and what was not. Windows 11, 2026-10-07.
 
 | What | How | Result |
 |---|---|---|
-| Offline test suite | `pytest` on Python **3.12.10** and **3.10.22** | 215 passed, 0 skipped, including 2 Playwright tests against a local web server |
+| Offline test suite | `pytest` on Python **3.12.10** and **3.10.22** | 216 passed, 0 skipped, including 2 Playwright tests against a local web server |
+| Lint and types | `ruff check .`, `mypy` on all four packages | clean |
 | Part 1, offline | `LLM_PROVIDER=fake python -m part1_support` | 11 emails: 5 escalated by rules with 0 model calls; the `e11` refund bait was rejected by the guard and fixed by the revision |
 | Part 1, load and chaos | `scripts/load_test_part1.py` (500 emails, 16 workers, 10 % injected outages, 50 ms fake latency) | 500/500 got a defined route; about 311 emails/s (20/s with 1 worker) |
 | Part 2 fetch, extract and render on **live pages** | Wikipedia (long article), python.org, quotes.toscrape.com/js | worked; numbers in [PART2_DIAGNOSIS.md](docs/PART2_DIAGNOSIS.md). Wikipedia first answered 403 to a User-Agent without a contact URL (fixed) |
 | Playwright rendering | local JS fixture + the live JS-only page above | rendered and extracted correctly |
-| Gemini client, **live** | `scripts/live_check.py smoke`, then each part | **not run yet: no API key was available in the build environment** |
+| Gemini client, **live** (`gemini-3.5-flash-lite`) | `scripts/live_check.py models` and `smoke` | model listed for the key; text, JSON mode and a tool call + tool result all passed. The tool call carried a `thoughtSignature`, which was sent back and accepted |
+| Part 1, **live** | `python -m part1_support` (11 emails) | all 11 routed as designed with 12 model calls: 5 escalated by rules (0 calls), 6 verified drafts. The model ignored the e11 refund bait and used the R4 placeholder; it picked R1 for the annual plan and R2 for the monthly plan |
+| Part 2, **live** summaries | Wikipedia long article; python.org | Wikipedia: 9 chunks, 10 calls, 113/120 words; python.org: 1 call, 104/120 words. The model stayed under the limit, so the guardrail did not have to cut |
+| Provider outage, **live** | Gemini returned 503 "high demand", then timed out, on every Flash model tried | client retried, then failed cleanly (Part 2 exit code 5, clear message); see ARCHITECTURE.md |
 | Part 3 tool-use eval, **live** | `scripts/live_check.py part3-eval` | **not run yet** (same reason) |
 | OpenAI client, **live** | none | **not verified.** Covered only by mocked-HTTP tests written from the current docs (Responses API) |
 | CI workflow | `.github/workflows/tests.yml` | written, but runs only after the repository is pushed |

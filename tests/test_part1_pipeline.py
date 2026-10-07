@@ -149,6 +149,17 @@ def test_link_from_the_kb_is_allowed():
     assert agent.process(question).route == DRAFT_READY
 
 
+def test_feedback_email_gets_the_feedback_guidance_even_without_matching_words():
+    """Seen live: 'One request: could you add a shortcut?' never matched the feedback FAQ by words."""
+    triage = {"categories": ["Feedback"], "critical_issue": False,
+              "kb_queries": ["keyboard shortcut switch themes"], "summary": "Asks for a theme shortcut."}
+    reply = "Thank you! We share every request with the product team. AcmeSync Support"
+    agent, fake = make_agent(script=[triage, draft(reply, ["general_faq#feedback-and-feature-requests"])])
+    email = Email("m8", "fay@example.com", "Love it", "One request: could you add a shortcut to switch themes?", NOW)
+    assert agent.process(email).route == DRAFT_READY
+    assert "general_faq#feedback-and-feature-requests" in fake.calls[1].messages[0].content
+
+
 # --------------------------------- model outages --------------------------------- #
 
 def test_model_outage_at_triage_fails_closed():

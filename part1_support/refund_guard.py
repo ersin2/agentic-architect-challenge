@@ -45,6 +45,7 @@ CLAIM_CUES = re.compile(r"""
     | \b(will|we'll|you'll|can|could|shall|going\ to)\s+(be\s+)?(\w+\s+)?
          (refund\w*|reimburs\w*|credit\w*|revers\w*|receive|get|issu\w*|process\w*|return\w*|send\w*|give\w*)\b
     | \b(not|non-?)\s*refundable\b | \bno\s+refunds?\b
+    | \b(must|required?|requires|need(s)?\ to|ha(ve|s)\ to|ensure|only\ if|as\ long\ as)\b   # conditions = rules too
 """, re.IGNORECASE | re.VERBOSE)
 
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
@@ -98,4 +99,14 @@ def check_refund_claims(reply: str, policy: dict[str, str], retrieved_ids: set[s
 
 def render_policy_slots(reply: str, policy: dict[str, str]) -> str:
     """Replace each placeholder with the exact clause text, in quotes. Call only after a clean check."""
-    return SLOT.sub(lambda m: f'"{policy[_clause_id(m.group(1))]}"', reply)
+    def quote(match: re.Match[str]) -> str:
+        text = policy[_clause_id(match.group(1))]
+        period = match.group(2) or ""
+        if text.endswith((".", "!", "?")):
+            period = ""  # '{{policy:R4}}.' must not become '... confirms it.".'
+        return f'"{text}"{period}'
+
+    return _SLOT_WITH_PERIOD.sub(quote, reply)
+
+
+_SLOT_WITH_PERIOD = re.compile(SLOT.pattern + r"(\.)?")

@@ -37,6 +37,10 @@ from .verify import verify_draft
 
 log = logging.getLogger("part1.pipeline")
 
+# Extra search per category. Customers rarely use our words ("one request: could you add..."),
+# so BM25 alone can miss the section that tells us how to answer that kind of email.
+CATEGORY_QUERIES = {"Feedback": "feedback and feature requests"}
+
 
 @dataclass
 class SupportAgent:
@@ -113,7 +117,9 @@ class SupportAgent:
         # 4. Retrieve. The refund policy is pinned whole whenever refunds come up.
         with span(log, "step.retrieve") as s:
             include_policy = mentions_refund(email.text) or any(mentions_refund(q) for q in triage.kb_queries)
-            chunks = self.kb.retrieve(triage.kb_queries + [email.subject], include_policy=include_policy)
+            queries = triage.kb_queries + [email.subject]
+            queries += [CATEGORY_QUERIES[c] for c in triage.categories if c in CATEGORY_QUERIES]
+            chunks = self.kb.retrieve(queries, include_policy=include_policy)
             s["chunk_ids"] = [c.id for c in chunks]
             s["policy_pinned"] = include_policy
         if not chunks:

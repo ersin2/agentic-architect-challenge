@@ -34,6 +34,12 @@ def test_placeholder_is_accepted_and_rendered_with_exact_policy_text():
     assert render_policy_slots(reply, POLICY) == f'Our refund policy says: "{POLICY["R1"]}"'
 
 
+def test_period_after_a_placeholder_is_not_doubled():
+    """Seen live: the model wrote '{{policy:R4}}.' and the clause already ends with a period."""
+    rendered = render_policy_slots("Our policy states: {{policy:R4}}. Thanks!", POLICY)
+    assert rendered == f'Our policy states: "{POLICY["R4"]}" Thanks!'
+
+
 def test_full_chunk_id_in_placeholder_is_accepted():
     assert check("Per our policy: {{policy:refund_policy#R3}}").ok
 
@@ -59,6 +65,9 @@ def test_paraphrase_next_to_a_placeholder_is_rejected():
     "Refunds usually take 3 business days.",
     "We will credit your card tomorrow.",
     "We will reverse the charge today.",
+    # Seen live: an accurate paraphrase of clause R6. Conditions are policy rules too, so they need a placeholder.
+    "To request a refund, please ensure your request comes from the account owner's email address.",
+    "Refund requests must be made by phone.",
 ])
 def test_refund_claims_in_own_words_are_rejected(reply):
     assert not check(reply).ok

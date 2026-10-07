@@ -35,7 +35,14 @@ real; tokens are estimated as characters / 4.
 | python.org, *About* (complex layout) | 42 KB | 5,088 chars | 1,720 chars (`<main>`) | -66 %: menus and footer removed |
 | quotes.toscrape.com/js (JavaScript-only) | 6 KB | 161 chars (no quotes at all) | detected as JS-only, rendered in headless Chromium: 1,454 chars of quotes | before: a summary of nothing; after: the real content |
 
-<!-- LIVE_SUMMARY_RESULTS -->
+With the real model (`gemini-3.5-flash-lite`, 120-word limit):
+
+| Page | Model calls | Summary length | Guardrail action |
+|---|---|---|---|
+| Wikipedia, *History of the Internet* | 10 (9 map + 1 reduce) | 113 words | none needed |
+| python.org, *About* | 1 | 104 words | none needed |
+
+<!-- LIVE_JS_RESULT -->
 
 ## Defects and fixes
 
