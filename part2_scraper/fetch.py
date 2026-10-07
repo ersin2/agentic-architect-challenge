@@ -44,10 +44,10 @@ Resolver = Callable[[str], list[str]]
 def user_agent() -> str:
     """Identify the bot with a contact. Sites such as Wikipedia reject requests without one (HTTP 403).
 
-    Set SCRAPER_CONTACT in .env to a URL or email address that reaches you, for example the
-    URL of this repository. Read at call time, so values from .env are picked up.
+    The default is this project's repository. If you run your own copy, set SCRAPER_CONTACT in
+    .env to a URL or email address that reaches you. Read at call time, so .env values are used.
     """
-    contact = os.environ.get("SCRAPER_CONTACT", "").strip() or "https://github.com/"
+    contact = os.environ.get("SCRAPER_CONTACT", "").strip() or "https://github.com/ersin2/agentic-architect-challenge"
     return f"AgenticArchitectChallenge-Summarizer/1.0 (+{contact}; educational project) httpx"
 
 

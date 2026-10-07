@@ -69,7 +69,7 @@ refund guard reject the draft and the revision fix it.
    LLM_PROVIDER=gemini
    GEMINI_API_KEY=your-key        # or LLM_PROVIDER=openai + OPENAI_API_KEY
    LLM_RPM=8                      # client-side rate limit; keeps a free-tier key under quota
-   SCRAPER_CONTACT=https://github.com/<you>/<repo>   # Part 2 User-Agent contact (Wikipedia needs one)
+   SCRAPER_CONTACT=https://github.com/<you>/<repo>   # optional: your contact in the Part 2 User-Agent
    ```
 2. Check the key and model:
    ```
@@ -86,7 +86,7 @@ refund guard reject the draft and the revision fix it.
 | `LLM_TIMEOUT_S`, `LLM_MAX_ATTEMPTS` | `60`, `3` | per-request timeout; attempts including retries |
 | `LLM_THINKING_LEVEL` | provider default | optional Gemini `thinkingLevel` (for example `low`) |
 | `LOG_FORMAT`, `LOG_LEVEL` | `json`, `INFO` | `text` gives readable logs |
-| `SCRAPER_CONTACT` | `https://github.com/` | URL or email put in the Part 2 User-Agent |
+| `SCRAPER_CONTACT` | this repository's URL | URL or email put in the Part 2 User-Agent (Wikipedia rejects requests without one) |
 
 ## Running each part
 
