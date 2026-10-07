@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import ipaddress
 import logging
+import os
 import socket
 import time
 from dataclasses import dataclass
@@ -33,8 +34,16 @@ from .errors import FetchError
 
 log = logging.getLogger("part2.fetch")
 
-# A descriptive User-Agent: some sites (e.g. Wikipedia) reject anonymous library defaults.
-USER_AGENT = "AgenticArchitectChallenge-Summarizer/1.0 (educational project; python-httpx)"
+
+
+def user_agent() -> str:
+    """Identify the bot with a contact. Sites such as Wikipedia reject requests without one (HTTP 403).
+
+    Set SCRAPER_CONTACT in .env to a URL or email address that reaches you, for example the
+    URL of this repository. Read at call time, so values from .env are picked up.
+    """
+    contact = os.environ.get("SCRAPER_CONTACT", "").strip() or "https://github.com/"
+    return f"AgenticArchitectChallenge-Summarizer/1.0 (+{contact}; educational project) httpx"
 ALLOWED_TYPES = ("text/html", "application/xhtml+xml", "text/plain")
 RETRYABLE = {429, 500, 502, 503, 504}
 
@@ -81,7 +90,7 @@ def _robots_allows(client: httpx.Client, url: str) -> bool:
         return True  # 4xx means "no rules"; we also do not block on 5xx
     parser = RobotFileParser()
     parser.parse(resp.text.splitlines())
-    return parser.can_fetch(USER_AGENT, url)
+    return parser.can_fetch(user_agent(), url)
 
 
 def fetch(url: str, *, timeout_s: float = 15.0, deadline_s: float = 30.0, max_bytes: int = 5_000_000,
@@ -92,7 +101,7 @@ def fetch(url: str, *, timeout_s: float = 15.0, deadline_s: float = 30.0, max_by
     started = time.monotonic()
     timeout = httpx.Timeout(timeout_s, connect=min(timeout_s, 10.0))
     with httpx.Client(timeout=timeout, transport=transport, follow_redirects=False,
-                      headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml,text/plain"}) as client:
+                      headers={"User-Agent": user_agent(), "Accept": "text/html,application/xhtml+xml,text/plain"}) as client:
         check_url(url, allow_private=allow_private, resolver=resolver)
         if respect_robots and not _robots_allows(client, url):
             raise FetchError("robots", f"robots.txt does not allow fetching {url}")

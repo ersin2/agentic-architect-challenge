@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import contextvars
 import logging
+import math
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
@@ -26,6 +27,8 @@ from .errors import SummaryError
 from .guardrail import enforce_word_limit
 
 log = logging.getLogger("part2.summarize")
+
+MAX_CHUNK_CHARS = 40_000  # about 10k tokens: the most text one call may carry
 
 MAP_SYSTEM = ("You read one part of a web page and write 3 to 6 short bullet points with its most important "
               "facts. Use only the given text. " + untrusted_note("page"))
@@ -52,7 +55,10 @@ class SummaryResult:
 def summarize(client: LLMClient, text: str, *, title: str = "", max_words: int = 120,
               chunk_chars: int = 12_000, max_chunks: int = 10, workers: int = 4) -> SummaryResult:
     llm = CountingClient(client)
-    chunks, content_truncated = chunk_text(text, chunk_chars, max_chunks)
+    # Keep the number of calls bounded (max_chunks) but cover the whole page when we can:
+    # grow the chunk size for long pages, up to a hard per-call ceiling.
+    size = min(max(chunk_chars, math.ceil(len(text) * 1.15 / max_chunks)), MAX_CHUNK_CHARS)
+    chunks, content_truncated = chunk_text(text, size, max_chunks)
     if not chunks:
         raise SummaryError("there is no text to summarise")
     warnings = []

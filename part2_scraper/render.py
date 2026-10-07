@@ -12,7 +12,7 @@ import logging
 from agentkit.obs import log_event
 
 from .errors import FetchError, RenderUnavailable
-from .fetch import USER_AGENT, Resolver, check_url, resolve_host
+from .fetch import Resolver, check_url, resolve_host, user_agent
 
 log = logging.getLogger("part2.render")
 SKIP_RESOURCES = {"image", "media", "font"}
@@ -36,7 +36,7 @@ def render_html(url: str, *, timeout_s: float = 20.0, allow_private: bool = Fals
             raise RenderUnavailable("Chromium could not start. Run: python -m playwright install chromium "
                                     f"({str(exc).splitlines()[0][:150]})") from exc
         try:
-            page = browser.new_page(user_agent=USER_AGENT)
+            page = browser.new_page(user_agent=user_agent())
             page.route("**/*", lambda route: route.abort() if route.request.resource_type in SKIP_RESOURCES
                        else route.continue_())
             page.goto(url, wait_until="domcontentloaded", timeout=timeout_s * 1000)

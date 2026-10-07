@@ -23,7 +23,8 @@ DROP_TAGS = ["script", "style", "noscript", "template", "svg", "canvas", "iframe
 DROP_ROLES = {"navigation", "banner", "contentinfo", "complementary", "dialog", "search"}
 # Matched against whole parts of class/id names ("cookie-banner" yes, "unrelated" no).
 NOISE_HINT = re.compile(r"(^|[\s_-])(cookies?|consent|banner|popup|modal|newsletter|subscribe|share|sharing|social|"
-                        r"advert|ads?|promo|sidebar|breadcrumbs?|related|comments?|footer|navbar|menu)($|[\s_-])",
+                        r"advert|ads?|promo|sidebar|breadcrumbs?|related|comments?|footer|navbar|navbox|menu|toc|"
+                        r"references|reflist|footnotes?|catlinks|editsection)($|[\s_-])",
                         re.IGNORECASE)
 KEEP_EVEN_IF_NOISY = {"html", "body", "main", "article"}
 HIDDEN_STYLE = re.compile(r"display\s*:\s*none|visibility\s*:\s*hidden", re.IGNORECASE)
