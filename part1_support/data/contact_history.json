@@ -1,0 +1,11 @@
+{
+  "_comment": "Earlier contacts per customer (seed data for the demo). Dana has 3 contacts in the 7 days before e07, so e07 is her 4th and must be escalated. Tom has 2 in the window (plus one older contact outside it), so e08 is his 3rd and must NOT be escalated.",
+  "contacts": [
+    {"customer": "dana.kim@example.com", "message_id": "h-dana-1", "received_at": "2026-10-01T09:00:00Z"},
+    {"customer": "dana.kim@example.com", "message_id": "h-dana-2", "received_at": "2026-10-03T14:30:00Z"},
+    {"customer": "dana.kim@example.com", "message_id": "h-dana-3", "received_at": "2026-10-05T16:45:00Z"},
+    {"customer": "tom.reyes@example.net", "message_id": "h-tom-0", "received_at": "2026-09-20T12:00:00Z"},
+    {"customer": "tom.reyes@example.net", "message_id": "h-tom-1", "received_at": "2026-10-02T08:00:00Z"},
+    {"customer": "tom.reyes@example.net", "message_id": "h-tom-2", "received_at": "2026-10-04T19:10:00Z"}
+  ]
+}
