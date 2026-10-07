@@ -1,0 +1,8 @@
+-r requirements.txt
+pytest>=8.0
+# Builds docs/architecture_onepager.pdf and the sample knowledge-base PDF
+reportlab>=4.0
+# Renders a PDF page to PNG so the one-pager can be checked visually
+pypdfium2>=4.0
+# Optional: JavaScript rendering in Part 2. After installing, run: python -m playwright install chromium
+playwright>=1.40

@@ -1,0 +1,26 @@
+[project]
+name = "agentic-architect-challenge"
+version = "1.0.0"
+description = "PointStar Agentic Architect Challenge: support-email agent, scraper fix, document Q&A agent."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+    "pypdf>=4.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+render = ["playwright>=1.40"]
+dev = ["pytest>=8.0", "reportlab>=4.0", "pypdfium2>=4.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-m 'not live' -q"
+markers = [
+    "live: calls a real LLM API or the public internet (run with: pytest -m live)",
+    "render: needs Playwright and its Chromium browser (skipped if missing)",
+]
