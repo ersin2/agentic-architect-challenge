@@ -153,26 +153,27 @@ pins the exact payloads.
 
 ## Verification status
 
-What was actually run, and what was not. Windows 11, 2026-10-07.
+What was actually run, and what was not. Windows 11, 2026-10-07. Live runs used a free-tier Gemini
+key with `LLM_RPM=8`, roughly 90 model requests in total.
 
 | What | How | Result |
 |---|---|---|
-| Offline test suite | `pytest` on Python **3.12.10** and **3.10.22** | 216 passed, 0 skipped, including 2 Playwright tests against a local web server |
+| Offline test suite | `pytest` on Python **3.12.10** and **3.10.22** | 220 passed, 0 skipped, including 2 Playwright tests against a local web server |
 | Lint and types | `ruff check .`, `mypy` on all four packages | clean |
 | Part 1, offline | `LLM_PROVIDER=fake python -m part1_support` | 11 emails: 5 escalated by rules with 0 model calls; the `e11` refund bait was rejected by the guard and fixed by the revision |
 | Part 1, load and chaos | `scripts/load_test_part1.py` (500 emails, 16 workers, 10 % injected outages, 50 ms fake latency) | 500/500 got a defined route; about 311 emails/s (20/s with 1 worker) |
-| Part 2 fetch, extract and render on **live pages** | Wikipedia (long article), python.org, quotes.toscrape.com/js | worked; numbers in [PART2_DIAGNOSIS.md](docs/PART2_DIAGNOSIS.md). Wikipedia first answered 403 to a User-Agent without a contact URL (fixed) |
-| Playwright rendering | local JS fixture + the live JS-only page above | rendered and extracted correctly |
-| Gemini client, **live** (`gemini-3.5-flash-lite`) | `scripts/live_check.py models` and `smoke` | model listed for the key; text, JSON mode and a tool call + tool result all passed. The tool call carried a `thoughtSignature`, which was sent back and accepted |
-| Part 1, **live** | `python -m part1_support` (11 emails) | all 11 routed as designed with 12 model calls: 5 escalated by rules (0 calls), 6 verified drafts. The model ignored the e11 refund bait and used the R4 placeholder; it picked R1 for the annual plan and R2 for the monthly plan |
-| Part 2, **live** summaries | Wikipedia long article; python.org | Wikipedia: 9 chunks, 10 calls, 113/120 words; python.org: 1 call, 104/120 words. The model stayed under the limit, so the guardrail did not have to cut |
-| Provider outage, **live** | Gemini returned 503 "high demand", then timed out, on every Flash model tried | client retried, then failed cleanly (Part 2 exit code 5, clear message); see ARCHITECTURE.md |
-| Part 3 tool-use eval, **live** | `scripts/live_check.py part3-eval` | **not run yet** (same reason) |
-| OpenAI client, **live** | none | **not verified.** Covered only by mocked-HTTP tests written from the current docs (Responses API) |
+| Gemini client, **live** (`gemini-3.5-flash-lite`) | `scripts/live_check.py models`, `smoke` | model listed for the key; text, JSON mode, and a tool call + tool result all passed. The tool call carried a `thoughtSignature`, which was sent back and accepted |
+| Part 1, **live** | `python -m part1_support` (all 11 emails, final code) | all routed as designed with 13 model calls: 5 escalated by rules (0 calls), 6 verified drafts. **The refund guard rejected one real draft** (the model restated clause R4 in its own words next to the placeholder); the one revision fixed it. The model picked R1 for the annual plan and R2 for the monthly plan, and ignored the "100 % refund" bait. Model latency p50 1.6 s, p95 2.5 s |
+| Part 2, **live** | Wikipedia long article, python.org, quotes.toscrape.com/js | Wikipedia: 9 chunks, 10 calls, 113/120 words. python.org: 1 call, 104/120 words. JS-only page: detected, rendered in headless Chromium, 1 call, 118/120 words. The model stayed under the limit each time, so the guardrail did not need to cut |
+| Part 3, **live** | `python -m part3_agent --demo`, `scripts/live_check.py part3-eval` | demo: name and city recalled, calculator called only for the hotel total (`4 * 220`). Eval: **6/6 tool decisions correct** (3 need arithmetic, 3 do not), 6/6 answers with the expected number |
+| Provider outage, **live** | Gemini returned `503 high demand`, then timed out, on every Flash model tried, for about 10 minutes | client retried, then failed cleanly (Part 2 exit code 5, clear message). After recovery, 4 calls timed out once and succeeded on the retry |
+| Issues found by the live runs and fixed | see git history | Wikipedia 403 without a contact URL; a refund condition paraphrased past the guard; a feedback FAQ section missed by BM25; an unsupported product claim; a double period after a placeholder; model latency that included our own rate-limit wait |
+| OpenAI client, **live** | none (no OpenAI key) | **not verified.** Covered only by mocked-HTTP tests written from the current docs (Responses API) |
 | CI workflow | `.github/workflows/tests.yml` | written, but runs only after the repository is pushed |
 
-The mocked-HTTP tests prove that the code sends what the documentation describes. They cannot
-prove that the documentation was read correctly. Only the live runs can show that.
+The mocked-HTTP tests prove that the code sends what the documentation describes. Only live runs
+show that the documentation was read correctly. That has been done for Gemini, not for OpenAI.
+The live runs are a small sample (one run per scenario), not a statistical evaluation.
 
 ## Known limitations
 
@@ -183,6 +184,10 @@ prove that the documentation was read correctly. Only the live runs can show tha
   drafts to a human. A refund promise written with no refund-related word could pass it. The
   placeholder design means the *policy text itself* can never be misquoted, but the model can
   pick a real clause that does not fit the case.
+- **Only refund facts are checked in code.** Other facts in a draft are guarded by the prompt, the
+  citation check and the link check, not by a fact checker. In one live run the model claimed a
+  feature did not exist, which the knowledge base never said; a prompt rule now forbids that, but a
+  prompt is not a guarantee. A production version would add a groundedness check per sentence.
 - **One process.** Threads, SQLite and an in-memory metrics registry are fine for this scope. A
   production version needs a queue and shared stores (see ARCHITECTURE.md).
 - **Main-content extraction is heuristic,** and very long pages (more than about 400k characters

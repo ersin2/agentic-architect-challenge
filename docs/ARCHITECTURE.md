@@ -93,7 +93,15 @@ The knowledge base is three Markdown FAQs, the refund policy, and a PDF product 
 is BM25 in pure Python. The drafting prompt allows facts only from the `<knowledge>` block, and the
 reply must cite the chunk ids it used. Code checks that every citation was in the context and that
 every link or email address in the reply appears in the knowledge base. That last check blocks
-phishing links that an injected email might try to plant.
+phishing links that an injected email might try to plant. Because customers rarely use the words
+of our FAQ, each category can add a fixed search: a Feedback email also searches "feedback and
+feature requests". (Live, BM25 missed that section for "One request: could you add...?")
+
+**Limit:** only refund facts are verified in code. Other facts are guarded by the prompt ("only facts
+from the knowledge"), the citation check and the link check, but not by a fact checker. In one live
+run the model said a feature did not exist, which the knowledge base never stated. A prompt rule now
+forbids such claims, but a prompt is not a guarantee. At scale, a per-sentence groundedness check
+(an entailment model or a second-model judge) would close this gap.
 
 ### Escalation to humans (requirement 3)
 
@@ -125,14 +133,22 @@ such as `{{policy:R1}}`. Code checks the draft (`refund_guard.py`):
 
 1. every placeholder names a real clause, and that clause was in the retrieved context;
 2. no sentence outside a placeholder talks about refunds **and** makes a claim (a number, a
-   duration, a percentage, "full", "eligible", "will refund", "non-refundable", ...). For any
-   number in such a sentence that is missing from the policy text, the error message names it.
+   duration, a percentage, "full", "eligible", "will refund", "non-refundable", or a condition
+   such as "must" or "only if"). For any number in such a sentence that is missing from the policy
+   text, the error message names it.
 
 Only after the check passes, code replaces each placeholder with the clause text, character for
 character, in quotes. **Refund facts in a draft can therefore only come from the policy document.**
 The guard runs on every draft, including Technical ones, because a model may offer "a refund as
 an apology" anywhere. If the check fails, the model revises once with the exact problems. If it
 fails again, the email goes to a human, with the problems attached (fail closed).
+
+**Seen live.** In the final live run, Gemini wrote clause R4 in its own words next to the
+placeholder ("...the duplicate charge is refunded in full after our billing team confirms it, as
+outlined in our policy: {{policy:R4}}"). The guard rejected the draft, the model revised it, and the
+revised draft used only the placeholder. In an earlier run the model restated clause R6 as a
+condition ("please ensure your request comes from the account owner's email"). The guard did not
+treat conditions as claims then. It does now, and a test covers that sentence.
 
 The refund policy is retrieved **all or nothing**. When the email or the triage queries mention
 refunds, all six clauses go into the context. Otherwise none do. This keeps retrieval misses from
@@ -181,6 +197,10 @@ stopped with exit code 5 and a clear message, instead of hanging or crashing. In
 error sends the email to a human, while the rule-based escalations keep working. A fallback to a
 second Gemini model would not have helped, because the overload hit all of them at once. The
 production fix is a second provider behind the same client interface.
+
+**Live numbers** (11 sample emails, `gemini-3.5-flash-lite`, free tier): 13 model calls, model
+latency p50 1.6 s and p95 2.5 s. Most of the wall-clock time per email (about 13 s) was spent
+waiting in our own rate limiter (`LLM_RPM=8`), which the logs report separately as `queued_ms`.
 
 **Load test** (offline, `scripts/load_test_part1.py`): 500 emails, 16 workers, a fake model with
 50 ms latency and 10 % injected outages. Every email got a defined route. Throughput was about

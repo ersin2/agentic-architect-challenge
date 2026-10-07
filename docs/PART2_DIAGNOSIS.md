@@ -41,8 +41,10 @@ With the real model (`gemini-3.5-flash-lite`, 120-word limit):
 |---|---|---|---|
 | Wikipedia, *History of the Internet* | 10 (9 map + 1 reduce) | 113 words | none needed |
 | python.org, *About* | 1 | 104 words | none needed |
+| quotes.toscrape.com/js (rendered in headless Chromium) | 1 | 118 words | none needed |
 
-<!-- LIVE_JS_RESULT -->
+The guardrail's cut path was not triggered by the real model in these runs; it is exercised by
+the offline tests (a fake model that ignores the limit twice) and by the offline demo.
 
 ## Defects and fixes
 

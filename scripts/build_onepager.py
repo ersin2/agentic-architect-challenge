@@ -36,10 +36,12 @@ DONE = colors.HexColor("#bbf7d0")
 DONE_EDGE = colors.HexColor("#15803d")
 RULE = colors.HexColor("#cbd2d9")
 
-VERIFICATION = ("<b>Verified:</b> 215 offline tests (fake model + mocked HTTP; no key, no network), including "
-                "Playwright rendering on a local JS page; offline load test (500 emails, 10% injected outages, "
-                "every email routed); fetch/extract/render on live pages (Wikipedia, python.org, a JS-only page). "
-                "<b>Live Gemini runs:</b> see README. <b>Not verified live:</b> the OpenAI client (mocked HTTP only).")
+VERIFICATION = ("<b>Verified:</b> 220 offline tests on Python 3.10 and 3.12 (fake model + mocked HTTP; ruff and mypy "
+                "clean); offline load test (500 emails, 10% injected outages, all routed). <b>Live on Gemini "
+                "(gemini-3.5-flash-lite):</b> all 11 emails routed as designed, and the refund guard rejected a real "
+                "paraphrased clause that the revision fixed; Part 2 on Wikipedia, python.org and a JS-only page "
+                "(113/104/118 words, limit 120); Part 3 eval 6/6 tool decisions; a real 503 outage was retried and "
+                "failed cleanly. <b>Not verified live:</b> the OpenAI client (mocked HTTP only).")
 
 styles = {
     "title": ParagraphStyle("title", fontName="Helvetica-Bold", fontSize=15.5, leading=18.5, textColor=INK),
@@ -168,7 +170,8 @@ def build() -> None:
             "<b>Multi-label triage</b> (Billing, Technical, Feedback, Other) validated against a fixed list; the "
             "model also writes the KB search queries (plan), code runs BM25 (act).",
             "<b>No invented refund facts:</b> the model may only write <font face='Courier'>{{policy:R2}}</font>; "
-            "code rejects refund claims in its own words and inserts the exact clause text. Check fails twice: human.",
+            "code rejects refund claims or conditions in its own words and inserts the exact clause text. "
+            "Check fails twice: human.",
         ]),
         p("Part 2: scraper fix", "h"),
         p("<b>Bottleneck:</b> the whole raw page in one prompt. <b>Fix:</b> safe fetch (timeouts + deadline, size "
