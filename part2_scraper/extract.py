@@ -44,7 +44,7 @@ class Extracted:
 
 def extract(html: str | bytes, encoding: str | None = None) -> Extracted:
     result = _extract(html, encoding, use_name_hints=True)
-    if len(result.text) < 200 and result.raw_chars > 2000 and not result.needs_js:
+    if len(result.text) < 200 and result.raw_chars > 2000:
         # The class/id heuristic can be wrong (a content div named "share-enabled").
         # If it left almost nothing, try again with tag-level cleaning only.
         retry = _extract(html, encoding, use_name_hints=False)

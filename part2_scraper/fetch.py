@@ -34,6 +34,10 @@ from .errors import FetchError
 
 log = logging.getLogger("part2.fetch")
 
+ALLOWED_TYPES = ("text/html", "application/xhtml+xml", "text/plain")
+RETRYABLE = {429, 500, 502, 503, 504}
+
+Resolver = Callable[[str], list[str]]
 
 
 def user_agent() -> str:
@@ -44,10 +48,6 @@ def user_agent() -> str:
     """
     contact = os.environ.get("SCRAPER_CONTACT", "").strip() or "https://github.com/"
     return f"AgenticArchitectChallenge-Summarizer/1.0 (+{contact}; educational project) httpx"
-ALLOWED_TYPES = ("text/html", "application/xhtml+xml", "text/plain")
-RETRYABLE = {429, 500, 502, 503, 504}
-
-Resolver = Callable[[str], list[str]]
 
 
 def resolve_host(host: str) -> list[str]:

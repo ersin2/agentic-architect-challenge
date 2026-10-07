@@ -72,5 +72,7 @@ def test_listing_page_with_many_articles_keeps_them_all():
 
 def test_overeager_class_heuristic_falls_back_to_tag_cleaning():
     body = "".join(f"<p>Paragraph {i} of the real story, with enough words to matter.</p>" for i in range(40))
-    html = f"<html><body><div class='post share-enabled'>{body}</div></body></html>".encode()
-    assert "Paragraph 39" in extract(html).text
+    html = (f"<html><head><script>var analytics = 1;</script></head>"
+            f"<body><div class='post share-enabled'>{body}</div></body></html>").encode()
+    page = extract(html)
+    assert "Paragraph 39" in page.text and not page.needs_js  # scripts alone must not mean "JS-only"
