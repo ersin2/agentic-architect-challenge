@@ -57,6 +57,8 @@ def test_paraphrase_next_to_a_placeholder_is_rejected():
     "We will refund the duplicate charge right away.",
     "Your money back will arrive in a few days.",
     "Refunds usually take 3 business days.",
+    "We will credit your card tomorrow.",
+    "We will reverse the charge today.",
 ])
 def test_refund_claims_in_own_words_are_rejected(reply):
     assert not check(reply).ok
@@ -76,3 +78,9 @@ def test_refund_promise_inside_a_technical_reply_is_caught():
 ])
 def test_harmless_sentences_pass(reply):
     assert check(reply).ok
+
+
+def test_known_blind_spot_promise_without_any_refund_word():
+    """Documented limit: the claim detector needs a refund-related word. This promise has none,
+    so it passes. The placeholder rule still means the policy text itself is never misquoted."""
+    assert check("Don't worry, the 50 USD will be back on your card on Friday.").ok

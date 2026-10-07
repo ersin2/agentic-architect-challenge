@@ -49,8 +49,9 @@ class Report:
         return asdict(self)
 
 
-def summarize_url(url: str, client: LLMClient, config: ScrapeConfig = ScrapeConfig(), *,
+def summarize_url(url: str, client: LLMClient, config: ScrapeConfig | None = None, *,
                   transport: httpx.BaseTransport | None = None, resolver: Resolver = resolve_host) -> Report:
+    config = config or ScrapeConfig()
     with trace() as trace_id:
         warnings: list[str] = []
         with span(log, "step.fetch", url=url) as s:
@@ -73,8 +74,9 @@ def summarize_url(url: str, client: LLMClient, config: ScrapeConfig = ScrapeConf
         return _summarise(page, client, config, url, trace_id, stats, warnings)
 
 
-def summarize_file(path: Path, client: LLMClient, config: ScrapeConfig = ScrapeConfig()) -> Report:
+def summarize_file(path: Path, client: LLMClient, config: ScrapeConfig | None = None) -> Report:
     """Offline entry point: summarise a saved HTML file (no network)."""
+    config = config or ScrapeConfig()
     with trace() as trace_id:
         body = path.read_bytes()
         with span(log, "step.extract", file=path.name) as s:

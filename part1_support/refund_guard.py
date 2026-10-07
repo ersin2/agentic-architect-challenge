@@ -32,7 +32,8 @@ _SLOT_MARK = "§"  # stands in for a placeholder while sentences are analysed
 
 REFUND_TOPIC = re.compile(
     r"\b(refund\w*|money[- ]back|your money|reimburs\w*|charge-?backs?|prorat\w*|pro-rat\w*|"
-    r"credit(ed)? back|repa(y|id|yment)\w*)\b", re.IGNORECASE)
+    r"credit(ed)? back|credit\w* (to )?(your|the) (card|account)|"
+    r"revers\w* (the |this |that |your )?(charge|payment|transaction)s?|repa(y|id|yment)\w*)\b", re.IGNORECASE)
 
 CLAIM_CUES = re.compile(r"""
       \d                                                   # any number: amounts, days, percentages
@@ -42,7 +43,7 @@ CLAIM_CUES = re.compile(r"""
     | \b(guarantee\w*|eligib\w*|entitled|qualif\w*|approv\w*|automatic\w*|immediate\w*)\b
     | \b(within|business\ days?)\b | \b(few|several|couple\ of)\s+(days?|weeks?)\b
     | \b(will|we'll|you'll|can|could|shall|going\ to)\s+(be\s+)?(\w+\s+)?
-         (refund\w*|reimburs\w*|credit\w*|receive|get|issu\w*|process\w*|return\w*|send\w*|give\w*)\b
+         (refund\w*|reimburs\w*|credit\w*|revers\w*|receive|get|issu\w*|process\w*|return\w*|send\w*|give\w*)\b
     | \b(not|non-?)\s*refundable\b | \bno\s+refunds?\b
 """, re.IGNORECASE | re.VERBOSE)
 
