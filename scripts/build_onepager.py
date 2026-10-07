@@ -36,12 +36,13 @@ DONE = colors.HexColor("#bbf7d0")
 DONE_EDGE = colors.HexColor("#15803d")
 RULE = colors.HexColor("#cbd2d9")
 
-VERIFICATION = ("<b>Verified:</b> 220 offline tests on Python 3.10 and 3.12 (fake model + mocked HTTP; ruff and mypy "
-                "clean); offline load test (500 emails, 10% injected outages, all routed). <b>Live on Gemini "
-                "(gemini-3.5-flash-lite):</b> all 11 emails routed as designed, and the refund guard rejected a real "
-                "paraphrased clause that the revision fixed; Part 2 on Wikipedia, python.org and a JS-only page "
-                "(113/104/118 words, limit 120); Part 3 eval 6/6 tool decisions; a real 503 outage was retried and "
-                "failed cleanly. <b>Not verified live:</b> the OpenAI client (mocked HTTP only).")
+VERIFICATION = ("<b>Verified:</b> 220 offline tests pass locally (Python 3.10, 3.12) and in GitHub Actions "
+                "(3.10, 3.11, 3.12), with a fake model and mocked HTTP; ruff and mypy clean; offline load test "
+                "(500 emails, 10% injected outages, all routed). <b>Live on Gemini (gemini-3.5-flash-lite):</b> "
+                "all 11 emails routed as designed, and the refund guard rejected a real paraphrased clause that "
+                "the revision fixed; Part 2 on Wikipedia, python.org and a JS-only page (113/104/118 words, limit "
+                "120); Part 3 eval 6/6 tool decisions; a real 503 outage was retried and failed cleanly. "
+                "<b>Not verified live:</b> the OpenAI client (mocked HTTP only).")
 
 styles = {
     "title": ParagraphStyle("title", fontName="Helvetica-Bold", fontSize=15.5, leading=18.5, textColor=INK),

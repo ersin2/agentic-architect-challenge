@@ -2,6 +2,8 @@
 
 **Ersin Uraiymov** · uraiymoversin@gmail.com
 
+[![tests](https://github.com/ersin2/agentic-architect-challenge/actions/workflows/tests.yml/badge.svg)](https://github.com/ersin2/agentic-architect-challenge/actions/workflows/tests.yml)
+
 Submission for the PointStar Developer Intern assessment. All three parts are working, tested
 Python code built on one small shared toolkit.
 
@@ -171,7 +173,7 @@ key with `LLM_RPM=8`, roughly 90 model requests in total.
 | Provider outage, **live** | Gemini returned `503 high demand`, then timed out, on every Flash model tried, for about 10 minutes | client retried, then failed cleanly (Part 2 exit code 5, clear message). After recovery, 4 calls timed out once and succeeded on the retry |
 | Issues found by the live runs and fixed | see git history | Wikipedia 403 without a contact URL; a refund condition paraphrased past the guard; a feedback FAQ section missed by BM25; an unsupported product claim; a double period after a placeholder; model latency that included our own rate-limit wait |
 | OpenAI client, **live** | none (no OpenAI key) | **not verified.** Covered only by mocked-HTTP tests written from the current docs (Responses API) |
-| CI workflow | `.github/workflows/tests.yml` | written, but runs only after the repository is pushed |
+| CI on GitHub Actions | `.github/workflows/tests.yml`: lint, types, tests incl. Playwright, load test | **passed on Python 3.10, 3.11 and 3.12** (Ubuntu), first run after the push |
 
 The mocked-HTTP tests prove that the code sends what the documentation describes. Only live runs
 show that the documentation was read correctly. That has been done for Gemini, not for OpenAI.
