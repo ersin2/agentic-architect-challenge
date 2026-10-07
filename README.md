@@ -1,5 +1,7 @@
 # Agentic Architect Challenge
 
+**Ersin Uraiymov** · uraiymoversin@gmail.com
+
 Submission for the PointStar Developer Intern assessment. All three parts are working, tested
 Python code built on one small shared toolkit.
 
@@ -24,7 +26,7 @@ part2_scraper/     before/ (reconstruction), fetch, extract, render, chunking, s
 part3_agent/       calculator, memory, tools, agent loop, evaluation, CLI; data/ holds the document
 scripts/           live_check.py, load_test_part1.py, build_onepager.py, build_kb_pdf.py
 tests/             offline test suite (fixtures/ holds the HTML test pages)
-docs/              architecture, Part 2 diagnosis, one-page PDF, interview preparation notes
+docs/              architecture, Part 2 diagnosis, one-page PDF
 ```
 
 ## Quick start (offline, no API key needed)

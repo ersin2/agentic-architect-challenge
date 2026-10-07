@@ -26,3 +26,6 @@ Thumbs.db
 
 # One-pager preview (rebuild with: python scripts/build_onepager.py --png)
 docs/*.png
+
+# Private preparation notes are kept outside the repository
+docs/INTERVIEW_NOTES.md

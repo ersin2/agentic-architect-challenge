@@ -147,7 +147,7 @@ def build() -> None:
     margin = 1.1 * cm
     doc = SimpleDocTemplate(str(OUT), pagesize=A4, leftMargin=margin, rightMargin=margin, topMargin=0.95 * cm,
                             bottomMargin=0.8 * cm, title="Agentic Architect Challenge: architecture",
-                            author="Agentic Architect Challenge submission")
+                            author="Ersin Uraiymov")
     width = A4[0] - 2 * margin
     col_gap = 0.45 * cm
     left_w = width * 0.47
@@ -223,6 +223,8 @@ def build() -> None:
                                  ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
     story = [
         p("Agentic Architect Challenge: architecture on one page", "title"),
+        p("<b>Ersin Uraiymov</b> &middot; uraiymoversin@gmail.com &middot; PointStar Developer Intern assessment",
+          "sub"),
         p("Python 3.10+, one shared toolkit (LLM clients for Gemini and OpenAI behind one interface, retries, "
           "circuit breaker, JSON validation, trace-id logging) and three parts. Everything runs offline with a fake "
           "model; the same code runs live with a key in .env.", "sub"),
