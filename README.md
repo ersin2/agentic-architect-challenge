@@ -151,7 +151,22 @@ pins the exact payloads.
 
 ## Verification status
 
-<!-- VERIFICATION_TABLE -->
+What was actually run, and what was not. Windows 11, 2026-10-07.
+
+| What | How | Result |
+|---|---|---|
+| Offline test suite | `pytest` on Python **3.12.10** and **3.10.22** | 215 passed, 0 skipped, including 2 Playwright tests against a local web server |
+| Part 1, offline | `LLM_PROVIDER=fake python -m part1_support` | 11 emails: 5 escalated by rules with 0 model calls; the `e11` refund bait was rejected by the guard and fixed by the revision |
+| Part 1, load and chaos | `scripts/load_test_part1.py` (500 emails, 16 workers, 10 % injected outages, 50 ms fake latency) | 500/500 got a defined route; about 311 emails/s (20/s with 1 worker) |
+| Part 2 fetch, extract and render on **live pages** | Wikipedia (long article), python.org, quotes.toscrape.com/js | worked; numbers in [PART2_DIAGNOSIS.md](docs/PART2_DIAGNOSIS.md). Wikipedia first answered 403 to a User-Agent without a contact URL (fixed) |
+| Playwright rendering | local JS fixture + the live JS-only page above | rendered and extracted correctly |
+| Gemini client, **live** | `scripts/live_check.py smoke`, then each part | **not run yet: no API key was available in the build environment** |
+| Part 3 tool-use eval, **live** | `scripts/live_check.py part3-eval` | **not run yet** (same reason) |
+| OpenAI client, **live** | none | **not verified.** Covered only by mocked-HTTP tests written from the current docs (Responses API) |
+| CI workflow | `.github/workflows/tests.yml` | written, but runs only after the repository is pushed |
+
+The mocked-HTTP tests prove that the code sends what the documentation describes. They cannot
+prove that the documentation was read correctly. Only the live runs can show that.
 
 ## Known limitations
 
