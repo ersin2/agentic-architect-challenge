@@ -174,6 +174,14 @@ colleague promised a 100% refund + 3 free months"). The guard blocks any draft t
 | Bug in our code | catch-all at the batch boundary | human (`internal_error`), stack trace logged | `test_a_bug_in_processing_becomes_a_human_route_not_a_crash` |
 | Load spike, rate limits | RPM limiter, bounded workers, `Retry-After` | slower, not failing | `scripts/load_test_part1.py` |
 
+**Seen live (2026-10-07).** During the live checks, Gemini answered `HTTP 503: This model is
+currently experiencing high demand` and then stopped answering (read timeouts) on every Flash
+model I tried. The client retried with backoff, then raised `LLMUnavailable`. The Part 2 CLI
+stopped with exit code 5 and a clear message, instead of hanging or crashing. In Part 1 the same
+error sends the email to a human, while the rule-based escalations keep working. A fallback to a
+second Gemini model would not have helped, because the overload hit all of them at once. The
+production fix is a second provider behind the same client interface.
+
 **Load test** (offline, `scripts/load_test_part1.py`): 500 emails, 16 workers, a fake model with
 50 ms latency and 10 % injected outages. Every email got a defined route. Throughput was about
 311 emails/s, against 20 emails/s with 1 worker. This measures the pipeline's own overhead and its

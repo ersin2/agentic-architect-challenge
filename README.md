@@ -24,7 +24,7 @@ part2_scraper/     before/ (reconstruction), fetch, extract, render, chunking, s
 part3_agent/       calculator, memory, tools, agent loop, evaluation, CLI; data/ holds the document
 scripts/           live_check.py, load_test_part1.py, build_onepager.py, build_kb_pdf.py
 tests/             offline test suite (fixtures/ holds the HTML test pages)
-docs/              architecture, Part 2 diagnosis, one-page PDF
+docs/              architecture, Part 2 diagnosis, one-page PDF, interview preparation notes
 ```
 
 ## Quick start (offline, no API key needed)
@@ -130,8 +130,8 @@ Human output goes to stdout. Logs go to stderr, one JSON object per line. Each l
 
 Follow one request end to end (the trace id is printed in the results table):
 ```powershell
-python -m part1_support 2> out/part1.log
-Select-String -Path out/part1.log -Pattern "8f9385035052"      # bash: grep 8f9385035052 out/part1.log
+python -m part1_support 2> part1.log
+Select-String -Path part1.log -Pattern "8f9385035052"      # bash: grep 8f9385035052 part1.log
 ```
 Logs never contain the API key, prompts or email bodies. Email addresses appear only as a
 hash.
@@ -142,6 +142,8 @@ hash.
 pytest                    # full offline suite (no key, no network)
 pytest -m render          # only the Playwright tests (local web server; skipped if Chromium is missing)
 python scripts/load_test_part1.py --emails 500 --workers 16 --failure-rate 0.1
+ruff check .              # lint
+mypy agentkit part1_support part2_scraper part3_agent --ignore-missing-imports   # types
 ```
 The tests target the boundaries that matter: 3 vs 4 contacts in 7 days, the exact 7-day edge, a
 model that invents a refund term (once, then fixed; or twice, then sent to a human), a model that

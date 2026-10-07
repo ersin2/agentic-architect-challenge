@@ -13,6 +13,7 @@ venv/
 
 # Runtime output
 out/
+*.log
 *.sqlite
 *.sqlite3
 sessions/
