@@ -82,7 +82,7 @@ refund guard reject the draft and the revision fix it.
 | Variable | Default | Meaning |
 |---|---|---|
 | `LLM_PROVIDER` | from the key present, else `fake` | `gemini`, `openai` or `fake` |
-| `LLM_MODEL` | `gemini-3.5-flash-lite` / `gpt-6-luna` | model id (checked against the providers' model lists on 2026-10-07) |
+| `LLM_MODEL` | `gemini-3.5-flash-lite` / `gpt-6-luna` | model id. The Gemini default was checked against the key's model list on 2026-10-07. The OpenAI default was taken from OpenAI's docs and is not verified |
 | `GEMINI_API_KEY` / `OPENAI_API_KEY` | none | the key; never printed or logged |
 | `LLM_RPM` | `0` (off) | requests-per-minute cap on the client side |
 | `LLM_TIMEOUT_S`, `LLM_MAX_ATTEMPTS` | `60`, `3` | per-request timeout; attempts including retries |

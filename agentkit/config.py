@@ -17,7 +17,9 @@ from .errors import ConfigError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-# Checked against the providers' model lists on 2026-10-07. Override with LLM_MODEL.
+# Gemini default: checked against the key's model list on 2026-10-07.
+# OpenAI default: taken from OpenAI's model docs on 2026-10-07, not verified with a key.
+# Override either with LLM_MODEL.
 DEFAULT_MODELS = {
     "gemini": "gemini-3.5-flash-lite",
     "openai": "gpt-6-luna",
