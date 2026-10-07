@@ -17,9 +17,9 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import Iterable
 
 from agentkit.errors import LLMError, LLMOutputError
 from agentkit.llm import CountingClient, LLMClient

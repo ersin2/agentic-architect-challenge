@@ -11,7 +11,8 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Callable, Sequence, TypeVar
+from collections.abc import Callable, Sequence
+from typing import Any, TypeVar
 
 from .errors import LLMOutputError
 from .llm import LLMClient, Message

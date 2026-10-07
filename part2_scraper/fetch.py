@@ -20,8 +20,8 @@ import logging
 import os
 import socket
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 from urllib.parse import urljoin, urlsplit
 from urllib.robotparser import RobotFileParser
 
@@ -36,6 +36,7 @@ log = logging.getLogger("part2.fetch")
 
 ALLOWED_TYPES = ("text/html", "application/xhtml+xml", "text/plain")
 RETRYABLE = {429, 500, 502, 503, 504}
+FETCH_RETRY = RetryPolicy(max_attempts=2, base_delay_s=1.0)
 
 Resolver = Callable[[str], list[str]]
 
@@ -52,7 +53,7 @@ def user_agent() -> str:
 
 def resolve_host(host: str) -> list[str]:
     try:
-        return sorted({info[4][0] for info in socket.getaddrinfo(host, None)})
+        return sorted({str(info[4][0]) for info in socket.getaddrinfo(host, None)})
     except socket.gaierror as exc:
         raise FetchError("network", f"cannot resolve host {host!r}") from exc
 
@@ -95,13 +96,12 @@ def _robots_allows(client: httpx.Client, url: str) -> bool:
 
 def fetch(url: str, *, timeout_s: float = 15.0, deadline_s: float = 30.0, max_bytes: int = 5_000_000,
           max_redirects: int = 5, respect_robots: bool = True, allow_private: bool = False,
-          retry: RetryPolicy = RetryPolicy(max_attempts=2, base_delay_s=1.0),
-          transport: httpx.BaseTransport | None = None, resolver: Resolver = resolve_host,
-          sleep: Callable[[float], None] = time.sleep) -> FetchResult:
+          retry: RetryPolicy = FETCH_RETRY, transport: httpx.BaseTransport | None = None,
+          resolver: Resolver = resolve_host, sleep: Callable[[float], None] = time.sleep) -> FetchResult:
     started = time.monotonic()
     timeout = httpx.Timeout(timeout_s, connect=min(timeout_s, 10.0))
-    with httpx.Client(timeout=timeout, transport=transport, follow_redirects=False,
-                      headers={"User-Agent": user_agent(), "Accept": "text/html,application/xhtml+xml,text/plain"}) as client:
+    headers = {"User-Agent": user_agent(), "Accept": "text/html,application/xhtml+xml,text/plain"}
+    with httpx.Client(timeout=timeout, transport=transport, follow_redirects=False, headers=headers) as client:
         check_url(url, allow_private=allow_private, resolver=resolver)
         if respect_robots and not _robots_allows(client, url):
             raise FetchError("robots", f"robots.txt does not allow fetching {url}")
@@ -112,7 +112,8 @@ def fetch(url: str, *, timeout_s: float = 15.0, deadline_s: float = 30.0, max_by
                 if attempt == retry.max_attempts:
                     raise FetchError(exc.kind, str(exc)) from None
                 delay = retry.delay(attempt, exc.retry_after)
-                log_event(log, "fetch.retry", logging.WARNING, attempt=attempt, delay_s=round(delay, 2), reason=str(exc))
+                log_event(log, "fetch.retry", logging.WARNING, attempt=attempt, delay_s=round(delay, 2),
+                          reason=str(exc))
                 sleep(delay)
     raise AssertionError("unreachable")
 

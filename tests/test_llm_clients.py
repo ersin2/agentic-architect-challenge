@@ -261,6 +261,19 @@ def test_non_json_success_body_is_an_output_error():
         gemini(rec).generate([Message("user", "x")])
 
 
+def test_rate_limit_wait_is_reported_separately_from_model_latency(json_logs):
+    from agentkit.metrics import METRICS
+    from agentkit.resilience import RateLimiter
+    limiter = RateLimiter(rpm=60, clock=lambda: 0.0, sleep=lambda s: None)  # 1 s spacing, no real sleeping
+    rec = Recorder(gemini_ok([{"text": "a"}]), gemini_ok([{"text": "b"}]))
+    client = gemini(rec, rate_limiter=limiter)
+    client.generate([Message("user", "x")])
+    client.generate([Message("user", "y")])
+    calls = [line for line in json_logs() if line["event"] == "llm.call"]
+    assert [c["queued_ms"] for c in calls] == [0.0, 1000.0]
+    assert METRICS.snapshot()["timings"]["llm.rate_limit_wait_ms"]["count"] == 1
+
+
 def test_client_repr_and_logs_never_contain_the_key(json_logs):
     rec = Recorder(httpx.Response(400, json={"error": {"message": "bad"}}))
     client = gemini(rec)

@@ -95,7 +95,8 @@ def _map(llm: CountingClient, chunks: list[str], heading: str, workers: int) -> 
     def one(index: int) -> str | None:
         prompt = (f"{heading}This is part {index + 1} of {len(chunks)}.\n\n" + wrap_untrusted("page", chunks[index]))
         try:
-            return llm.generate([Message("user", prompt)], system=MAP_SYSTEM, max_output_tokens=1024).text.strip() or None
+            notes = llm.generate([Message("user", prompt)], system=MAP_SYSTEM, max_output_tokens=1024).text
+            return notes.strip() or None
         except LLMError as exc:
             log_event(log, "summarize.map_failed", logging.WARNING, part=index + 1, error=type(exc).__name__)
             return None

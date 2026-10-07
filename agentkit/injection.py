@@ -19,9 +19,14 @@ import unicodedata
 _SIGNALS: dict[str, re.Pattern[str]] = {
     name: re.compile(pattern)
     for name, pattern in {
-        "ignore_instructions": r"\b(ignore|disregard|forget|override)\b.{0,30}\b(previous|prior|above|earlier|all|your|system)\b.{0,20}\b(instructions?|prompts?|rules|guidelines)\b",
-        "reveal_prompt": r"\b(reveal|print|show|repeat|output)\b.{0,20}\b(system prompt|your (instructions|prompt|rules))\b",
-        "role_override": r"\byou are (now|no longer)\b|\bact as (the |an? )?(system|admin|administrator|developer)\b|\b(developer|jailbreak|dan) mode\b",
+        "ignore_instructions": (r"\b(ignore|disregard|forget|override)\b.{0,30}"
+                                r"\b(previous|prior|above|earlier|all|your|system)\b.{0,20}"
+                                r"\b(instructions?|prompts?|rules|guidelines)\b"),
+        "reveal_prompt": (r"\b(reveal|print|show|repeat|output)\b.{0,20}"
+                          r"\b(system prompt|your (instructions|prompt|rules))\b"),
+        "role_override": (r"\byou are (now|no longer)\b"
+                          r"|\bact as (the |an? )?(system|admin|administrator|developer)\b"
+                          r"|\b(developer|jailbreak|dan) mode\b"),
         "fake_markup": r"</?\s*(system|assistant|instructions?|email|document|page)\s*>|\[/?(system|inst)\]",
         "new_instructions": r"\b(new|updated|real) (instructions|task|rules)\s*:",
     }.items()

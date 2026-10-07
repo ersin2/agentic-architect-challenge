@@ -87,7 +87,8 @@ def _remove_boilerplate(soup: BeautifulSoup, use_name_hints: bool) -> None:
         if tag.decomposed or tag.name in KEEP_EVEN_IF_NOISY:
             continue
         hint = " ".join(tag.get("class") or []) + " " + str(tag.get("id") or "")
-        if tag.get("role") in DROP_ROLES or tag.get("aria-hidden") == "true" or (hint.strip() and NOISE_HINT.search(hint)):
+        noisy_name = bool(hint.strip() and NOISE_HINT.search(hint))
+        if tag.get("role") in DROP_ROLES or tag.get("aria-hidden") == "true" or noisy_name:
             tag.decompose()
 
 
@@ -95,7 +96,7 @@ def _main_block(soup: BeautifulSoup) -> tuple[Tag | None, str]:
     articles = soup.find_all("article")
     if len(articles) == 1:
         return articles[0], "article"
-    main = soup.find("main") or soup.find(attrs={"role": "main"})
+    main = soup.find("main") or soup.find(role="main")
     if main is not None:
         return main, "main"
     if not articles:  # several <article> tags = a listing page; keep them all via <body>

@@ -32,7 +32,8 @@ def test_refund_policy_is_all_or_nothing_in_retrieval():
     without = KB.retrieve(["annual plan refund"], include_policy=False)
     with_policy = KB.retrieve(["annual plan refund"], include_policy=True)
     assert not any(c.id.startswith("refund_policy#") for c in without)
-    assert [c.id for c in with_policy if c.id.startswith("refund_policy#")] == [f"refund_policy#R{i}" for i in range(1, 7)]
+    pinned = [c.id for c in with_policy if c.id.startswith("refund_policy#")]
+    assert pinned == [f"refund_policy#R{i}" for i in range(1, 7)]
 
 
 def test_only_kb_links_are_allowed_in_drafts():

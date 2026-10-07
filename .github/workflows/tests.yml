@@ -17,6 +17,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
+      - name: Lint and type check
+        run: |
+          ruff check .
+          mypy agentkit part1_support part2_scraper part3_agent --ignore-missing-imports
       - name: Install Chromium for the render tests
         run: python -m playwright install --with-deps chromium
       - name: Run the offline test suite (no API key, no internet needed)

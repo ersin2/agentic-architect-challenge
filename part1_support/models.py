@@ -69,7 +69,7 @@ class Email:
         return f"{self.subject}\n\n{self.body}"
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Email":
+    def from_dict(cls, data: dict[str, Any]) -> Email:
         missing = [k for k in ("message_id", "sender", "received_at") if not data.get(k)]
         if missing:
             raise ValueError(f"email record is missing {missing}")

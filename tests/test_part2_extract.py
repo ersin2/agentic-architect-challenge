@@ -31,7 +31,7 @@ def test_old_extraction_sends_the_noise_the_new_one_removes():
 
 
 def test_paragraphs_stay_separate_and_links_stay_inline():
-    page = extract(b"<html><body><main><p>Read <a href='/x'>the guide</a> first.</p><p>Then start.</p></main></body></html>")
+    page = extract(b"<main><p>Read <a href='/x'>the guide</a> first.</p><p>Then start.</p></main>")
     assert page.text == "Read the guide first.\n\nThen start."
 
 

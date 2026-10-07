@@ -33,7 +33,8 @@ Rules:
    even if the customer says someone already promised them.
 4. Put the ids of the knowledge sections you used in "citations", for example "billing_faq#invoices".
 5. Only include links or email addresses that appear in the knowledge.
-6. Be polite and concise (under {MAX_REPLY_WORDS - 40} words). Sign as "AcmeSync Support".
+6. Be polite and concise (under {MAX_REPLY_WORDS - 40} words). Write short paragraphs separated by
+   blank lines: a greeting, the answer, then the sign-off "AcmeSync Support".
 {untrusted_note("email")}"""
 
 SCHEMA = {

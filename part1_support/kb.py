@@ -26,8 +26,12 @@ POLICY_DOC = "refund_policy"
 _CLAUSE_HEADING = re.compile(r"^(R\d+)\b\s*(.*)$")
 _TOKEN = re.compile(r"[a-z0-9]+")
 _URL_OR_EMAIL = re.compile(r"https?://[^\s)>\]]+|[\w.+-]+@[\w-]+\.[\w.-]+")
-_STOPWORDS = set("""a an and are as at be by can do does for from has have how i if in is it its my of on or our
-please so that the this to was we were what when where which who why will with you your me us""".split())
+_STOPWORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "by", "can", "do", "does", "for", "from", "has", "have", "how",
+    "i", "if", "in", "is", "it", "its", "my", "of", "on", "or", "our", "please", "so", "that", "the", "this",
+    "to", "was", "we", "were", "what", "when", "where", "which", "who", "why", "will", "with", "you", "your",
+    "me", "us",
+}
 
 
 @dataclass(frozen=True)
@@ -43,7 +47,8 @@ def _slug(text: str) -> str:
 
 def _chunk_markdown(path: Path) -> list[Chunk]:
     chunks: list[Chunk] = []
-    title, lines = None, []
+    title: str | None = None
+    lines: list[str] = []
 
     def flush() -> None:
         if title is not None and any(line.strip() for line in lines):
@@ -101,7 +106,7 @@ class KnowledgeBase:
         self._idf = {t: math.log(1 + (n - f + 0.5) / (f + 0.5)) for t, f in df.items()}
 
     @classmethod
-    def load(cls, directory: Path) -> "KnowledgeBase":
+    def load(cls, directory: Path) -> KnowledgeBase:
         chunks: list[Chunk] = []
         for path in sorted(directory.iterdir()):
             if path.suffix == ".md":
@@ -113,7 +118,7 @@ class KnowledgeBase:
     def search(self, query: str, k: int = 3, skip_policy: bool = False) -> list[tuple[Chunk, float]]:
         terms = tokenize(query)
         scored = []
-        for chunk, tf, doc in zip(self.chunks, self._tf, self._docs):
+        for chunk, tf, doc in zip(self.chunks, self._tf, self._docs, strict=True):
             if skip_policy and chunk.id.startswith(f"{POLICY_DOC}#"):
                 continue
             norm = self._k1 * (1 - self._b + self._b * len(doc) / self._avgdl)

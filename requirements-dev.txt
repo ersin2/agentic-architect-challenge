@@ -1,5 +1,8 @@
 -r requirements.txt
 pytest>=8.0
+# Lint and type checks (configured in pyproject.toml)
+ruff>=0.6
+mypy>=1.10
 # Builds docs/architecture_onepager.pdf and the sample knowledge-base PDF
 reportlab>=4.0
 # Renders a PDF page to PNG so the one-pager can be checked visually

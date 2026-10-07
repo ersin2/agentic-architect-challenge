@@ -17,9 +17,10 @@ import logging
 import sys
 import time
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Any, Iterator, TextIO
+from typing import Any, TextIO
 
 _trace_id: contextvars.ContextVar[str] = contextvars.ContextVar("trace_id", default="-")
 

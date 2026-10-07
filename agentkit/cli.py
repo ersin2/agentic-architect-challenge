@@ -12,10 +12,9 @@ from .obs import setup_logging
 def prepare_cli(log_level: str | None = None) -> Settings | None:
     """UTF-8 console, settings, logging. Returns None (after printing why) if configuration is invalid."""
     for stream in (sys.stdout, sys.stderr):
-        try:
-            stream.reconfigure(encoding="utf-8", errors="replace")  # Windows consoles are not UTF-8 by default
-        except AttributeError:
-            pass
+        reconfigure = getattr(stream, "reconfigure", None)  # absent when output is redirected oddly
+        if reconfigure is not None:  # Windows consoles are not UTF-8 by default
+            reconfigure(encoding="utf-8", errors="replace")
     try:
         settings = load_settings()
     except ConfigError as exc:

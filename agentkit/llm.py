@@ -16,8 +16,9 @@ import logging
 import random
 import threading
 import time
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any, Callable, Protocol, Sequence
+from typing import Any, Protocol
 
 import httpx
 
@@ -65,7 +66,7 @@ class Message:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Message":
+    def from_dict(cls, data: dict[str, Any]) -> Message:
         calls = [ToolCall(**c) for c in data.get("tool_calls", [])]
         return cls(**{**data, "tool_calls": calls})
 
@@ -116,12 +117,16 @@ class BaseClient:
                       duration_ms=duration_ms)
             raise
         duration_ms = round((time.perf_counter() - start) * 1000, 1)
+        # Time spent waiting in our own rate limiter is not model latency; report it separately.
+        queued_ms = round(self._queued_seconds() * 1000, 1)
         METRICS.incr("llm.calls")
-        METRICS.observe("llm.latency_ms", duration_ms)
+        METRICS.observe("llm.latency_ms", duration_ms - queued_ms)
+        if queued_ms:
+            METRICS.observe("llm.rate_limit_wait_ms", queued_ms)
         METRICS.incr("llm.tokens.input", resp.usage.get("input_tokens", 0))
         METRICS.incr("llm.tokens.output", resp.usage.get("output_tokens", 0))
         log_event(log, "llm.call", provider=self.provider, model=self.model, status="ok",
-                  duration_ms=duration_ms, finish_reason=resp.finish_reason,
+                  duration_ms=duration_ms, queued_ms=queued_ms, finish_reason=resp.finish_reason,
                   tool_calls=[c.name for c in resp.tool_calls], json_mode=json_schema is not None,
                   input_tokens=resp.usage.get("input_tokens", 0),
                   output_tokens=resp.usage.get("output_tokens", 0))
@@ -131,6 +136,10 @@ class BaseClient:
                   json_schema: dict[str, Any] | None, max_output_tokens: int,
                   temperature: float | None) -> LLMResponse:
         raise NotImplementedError
+
+    def _queued_seconds(self) -> float:
+        """Seconds the last call on this thread waited in the client-side rate limiter."""
+        return 0.0
 
 
 # --------------------------------------------------------------------------- #
@@ -188,16 +197,21 @@ class _HTTPClient(BaseClient):
         self.rate_limiter = rate_limiter or RateLimiter(0)
         self._sleep = sleep
         self._http = httpx.Client(timeout=httpx.Timeout(timeout_s, connect=10.0), transport=transport)
+        self._local = threading.local()  # per-thread rate-limit wait of the current call
 
     def __repr__(self) -> str:  # never show the key
         return f"{type(self).__name__}(model={self.model!r})"
 
+    def _queued_seconds(self) -> float:
+        return getattr(self._local, "queued_s", 0.0)
+
     def _post(self, url: str, headers: dict[str, str], payload: dict[str, Any]) -> dict[str, Any]:
+        self._local.queued_s = 0.0
         if not self.breaker.allow():
             raise LLMUnavailable(f"{self.provider}: circuit open after repeated failures, failing fast")
         last: LLMError = LLMUnavailable("no attempt made")
         for attempt in range(1, self.retry.max_attempts + 1):
-            self.rate_limiter.acquire()
+            self._local.queued_s += self.rate_limiter.acquire()
             retry_after = None
             try:
                 resp = self._http.post(url, headers=headers, json=payload)
@@ -321,7 +335,9 @@ class GeminiClient(_HTTPClient):
         self.thinking_level = thinking_level
         self.base_url = base_url
 
-    def _generate(self, messages, *, system, tools, json_schema, max_output_tokens, temperature):
+    def _generate(self, messages: list[Message], *, system: str | None, tools: list[ToolSpec],
+                  json_schema: dict[str, Any] | None, max_output_tokens: int,
+                  temperature: float | None) -> LLMResponse:
         payload: dict[str, Any] = {"contents": _gemini_contents(messages)}
         if system:
             payload["systemInstruction"] = {"parts": [{"text": system}]}
@@ -420,7 +436,9 @@ class OpenAIClient(_HTTPClient):
         super().__init__(model, api_key, **kwargs)
         self.base_url = base_url
 
-    def _generate(self, messages, *, system, tools, json_schema, max_output_tokens, temperature):
+    def _generate(self, messages: list[Message], *, system: str | None, tools: list[ToolSpec],
+                  json_schema: dict[str, Any] | None, max_output_tokens: int,
+                  temperature: float | None) -> LLMResponse:
         payload: dict[str, Any] = {
             "model": self.model,
             "input": _openai_input(messages),
@@ -502,7 +520,9 @@ class FakeClient(BaseClient):
         self._lock = threading.Lock()
         self.calls: list[FakeRequest] = []
 
-    def _generate(self, messages, *, system, tools, json_schema, max_output_tokens, temperature):
+    def _generate(self, messages: list[Message], *, system: str | None, tools: list[ToolSpec],
+                  json_schema: dict[str, Any] | None, max_output_tokens: int,
+                  temperature: float | None) -> LLMResponse:
         request = FakeRequest(list(messages), system, list(tools), json_schema)
         with self._lock:
             self.calls.append(request)

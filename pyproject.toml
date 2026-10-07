@@ -14,7 +14,7 @@ dependencies = [
 
 [project.optional-dependencies]
 render = ["playwright>=1.40"]
-dev = ["pytest>=8.0", "reportlab>=4.0", "pypdfium2>=4.0"]
+dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.10", "reportlab>=4.0", "pypdfium2>=4.0"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -24,3 +24,10 @@ markers = [
     "live: calls a real LLM API or the public internet (run with: pytest -m live)",
     "render: needs Playwright and its Chromium browser (skipped if missing)",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP", "SIM", "I"]

@@ -12,7 +12,7 @@ from __future__ import annotations
 import ast
 import math
 import operator
-from typing import Callable
+from collections.abc import Callable
 
 from agentkit.errors import ToolError
 
@@ -55,7 +55,8 @@ def _check(value: int | float) -> int | float:
 
 
 def _evaluate(node: ast.AST) -> int | float:
-    if isinstance(node, ast.Constant) and type(node.value) in (int, float):  # excludes bool, str, complex
+    # bool is a subclass of int, so it is excluded explicitly; str and complex fail the isinstance check
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
         return _check(node.value)
     if isinstance(node, ast.BinOp) and type(node.op) in _BINARY:
         left, right = _evaluate(node.left), _evaluate(node.right)

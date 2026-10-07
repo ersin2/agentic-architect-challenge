@@ -15,7 +15,6 @@ from agentkit.llm import FakeClient, Message, ToolCall, get_client
 from agentkit.obs import hash_id, log_event, span, trace
 from agentkit.resilience import CircuitBreaker, RateLimiter, RetryPolicy
 
-
 # ------------------------------- config ------------------------------- #
 
 def test_settings_repr_never_shows_the_key():
@@ -138,9 +137,8 @@ def test_each_thread_logs_under_its_own_trace_id(json_logs):
 
 
 def test_span_logs_failure_and_reraises(json_logs):
-    with pytest.raises(KeyError):
-        with span(logging.getLogger("test"), "risky.step", item="x"):
-            raise KeyError("boom")
+    with pytest.raises(KeyError), span(logging.getLogger("test"), "risky.step", item="x"):
+        raise KeyError("boom")
     (line,) = [entry for entry in json_logs() if entry["event"] == "risky.step"]
     assert (line["status"], line["error"], line["item"]) == ("error", "KeyError", "x")
 

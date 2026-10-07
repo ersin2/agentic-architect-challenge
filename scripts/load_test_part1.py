@@ -56,7 +56,8 @@ def main() -> int:
     for i in range(args.emails):
         subject, body = rng.choice(TEMPLATES)
         sender = f"customer{rng.randint(1, args.emails // 3)}@example.com"  # repeat senders -> frequent contact
-        emails.append(Email(f"load-{i}", sender, subject, body, start_time + timedelta(minutes=rng.randint(0, 7 * 24 * 60))))
+        received = start_time + timedelta(minutes=rng.randint(0, 7 * 24 * 60))
+        emails.append(Email(f"load-{i}", sender, subject, body, received))
 
     client = FaultyClient(FakeClient(offline.responder), failure_rate=args.failure_rate,
                           latency_s=args.latency, seed=args.seed)

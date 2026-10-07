@@ -103,7 +103,7 @@ def flow_diagram(width: float) -> Drawing:
     bw = (width - gap * (n - 1)) / n
     bh, y = 40, 70
     xs = [i * (bw + gap) for i in range(n)]
-    for (lines, fill, edge), x in zip(steps, xs):
+    for (lines, fill, edge), x in zip(steps, xs, strict=True):
         _box(d, x, y, bw, bh, lines, fill, edge)
     for i in range(n - 1):
         _arrow(d, xs[i] + bw, y + bh / 2, xs[i + 1], y + bh / 2)

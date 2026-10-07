@@ -88,7 +88,7 @@ class ConversationMemory:
         path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
     @classmethod
-    def load(cls, path: Path, max_tokens: int = 6_000) -> "ConversationMemory":
+    def load(cls, path: Path, max_tokens: int = 6_000) -> ConversationMemory:
         memory = cls(max_tokens)
         if path.exists():
             data = json.loads(path.read_text(encoding="utf-8"))
